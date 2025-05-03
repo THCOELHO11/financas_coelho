@@ -1,83 +1,79 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import CalculadoraRapida from './components/CalculadoraRapida';
-import ContasDoMes from './components/ContasDoMes';
-import GraficoGastos from './components/GraficoGastos';
-import HistoricoGastos from './components/HistoricoGastos';
-import Login from './components/Login';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import CalculadoraRapida from "./components/CalculadoraRapida";
+import ContasDoMes from "./components/ContasDoMes";
+import GraficoGastos from "./components/GraficoGastos";
+import HistoricoGastos from "./components/HistoricoGastos";
+import LimiteDiario from "./components/LimiteDiario";
+import Login from "./components/Login";
 import { GastosProvider } from "./components/GastosContext";
+import { Calculator, Plus, PieChart, FileText, Target } from "lucide-react";
 
 const getHighlightColor = (path) => {
   switch (path) {
-    case '/': return '#001f3f';
-    case '/despesas': return '#FFD700';
-    case '/grafico': return '#c8e6c9';
-    case '/historico': return '#2f3e46';
-    default: return 'transparent';
+    case "/calculadora": return "#001f3f";
+    case "/contas": return "#ffd700";
+    case "/graficos": return "#556b2f";
+    case "/historico": return "#7f8fa6";
+    case "/limite": return "#3b5998";
+    default: return "transparent";
   }
 };
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const getStyle = (path) => ({
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '60px',
-    marginBottom: '0.5rem',
-    backgroundColor: location.pathname === path ? getHighlightColor(path) : 'transparent',
-    borderLeft: location.pathname === path ? '4px solid #000' : '4px solid transparent',
-    transition: 'all 0.3s',
-    fontSize: '24px',
-    color: '#000',
-    textDecoration: 'none'
-  });
+  const buttons = [
+    { label: "CALCULADORA", path: "/calculadora", icon: <Calculator size={20} /> },
+    { label: "CONTAS DO MÊS", path: "/contas", icon: <Plus size={20} /> },
+    { label: "GRÁFICOS", path: "/graficos", icon: <PieChart size={20} /> },
+    { label: "HISTÓRICO", path: "/historico", icon: <FileText size={20} /> },
+    { label: "LIMITE DIÁRIO", path: "/limite", icon: <Target size={20} /> }
+  ];
 
   return (
-    <div style={{
-      width: '60px',
-      backgroundColor: '#f0f0f0',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      paddingTop: '1rem',
-      height: '100vh',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      zIndex: 1000
-    }}>
-      <Link to="/" style={getStyle('/')}>🧮</Link>
-      <Link to="/despesas" style={getStyle('/despesas')}>➕</Link>
-      <Link to="/grafico" style={getStyle('/grafico')}>📊</Link>
-      <Link to="/historico" style={getStyle('/historico')}>📋</Link>
+    <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-around", backgroundColor: "#eee", padding: "0.5rem 0", borderBottom: "2px solid #ccc" }}>
+      {buttons.map((btn) => (
+        <button
+          key={btn.path}
+          onClick={() => navigate(btn.path)}
+          style={{
+            backgroundColor: location.pathname === btn.path ? getHighlightColor(btn.path) : "transparent",
+            color: location.pathname === btn.path ? "white" : "black",
+            border: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.5rem 1rem",
+            borderRadius: "10px",
+            fontWeight: "bold",
+            fontSize: "0.85rem",
+            cursor: "pointer"
+          }}
+        >
+          <span>{btn.label}</span> {btn.icon}
+        </button>
+      ))}
     </div>
   );
 };
 
-const AppRoutes = () => (
-  <div style={{ display: 'flex' }}>
-    <Sidebar />
-    <div style={{ marginLeft: '60px', flex: 1 }}>
-      <Routes>
-        <Route path="/" element={<CalculadoraRapida />} />
-        <Route path="/despesas" element={<ContasDoMes />} />
-        <Route path="/grafico" element={<GraficoGastos />} />
-        <Route path="/historico" element={<HistoricoGastos />} />
-      </Routes>
-    </div>
-  </div>
-);
-
 const App = () => {
-  const [logado, setLogado] = useState(false);
-
   return (
     <GastosProvider>
       <Router>
-        {!logado ? <Login onLogin={() => setLogado(true)} /> : <AppRoutes />}
+        <Login>
+          <Sidebar />
+          <Routes>
+            <Route path="/" element={<CalculadoraRapida />} />
+            <Route path="/calculadora" element={<CalculadoraRapida />} />
+            <Route path="/contas" element={<ContasDoMes />} />
+            <Route path="/graficos" element={<GraficoGastos />} />
+            <Route path="/historico" element={<HistoricoGastos />} />
+            <Route path="/limite" element={<LimiteDiario />} />
+          </Routes>
+        </Login>
       </Router>
     </GastosProvider>
   );

@@ -1,146 +1,82 @@
-import React, { useContext, useState } from 'react';
-import { GastosContext } from "./GastosContext";
-import {
-  PieChart, Pie, Cell, Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Label
-} from 'recharts';
+import React, { useContext, useState } from "react";
+import { GastosContext } from "../components/GastosContext";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from "recharts";
 
-const meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#00C49F", "#FFBB28"];
+const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+const nomesMeses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
+const anos = [2025, 2026, 2027, 2028, 2029, 2030];
 
 const GraficoGastos = () => {
   const { gastos } = useContext(GastosContext);
   const hoje = new Date();
-  const [anoAtual, setAnoAtual] = useState(hoje.getFullYear());
-  const [mesAtual, setMesAtual] = useState(hoje.getMonth());
+  const [mesSelecionado, setMesSelecionado] = useState(hoje.getMonth());
+  const [anoSelecionado, setAnoSelecionado] = useState(hoje.getFullYear());
 
-  const cores = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+  const gastosFiltrados = gastos.filter(g => g.mes === mesSelecionado && g.ano === anoSelecionado);
+  const porNatureza = gastosFiltrados.reduce((acc, g) => {
+    acc[g.natureza] = (acc[g.natureza] || 0) + parseFloat(g.valor.replace(/[^\d,]/g, '').replace(',', '.'));
+    return acc;
+  }, {});
+  const porCartao = gastosFiltrados.filter(g => g.cartao).reduce((acc, g) => {
+    acc[g.cartao] = (acc[g.cartao] || 0) + parseFloat(g.valor.replace(/[^\d,]/g, '').replace(',', '.'));
+    return acc;
+  }, {});
 
-  const getIntervaloMes = () => {
-    const inicio = new Date(anoAtual, mesAtual - 1, 26);
-    const fim = new Date(anoAtual, mesAtual, 25);
-    return { inicio, fim };
-  };
-
-  const filtrarGastos = () => {
-    const { inicio, fim } = getIntervaloMes();
-    return gastos.filter(g => {
-      const data = new Date(g.data);
-      return data >= inicio && data <= fim;
-    });
-  };
-
-  const dadosFiltrados = filtrarGastos();
-
-  const dadosPorNatureza = Object.values(
-    dadosFiltrados.reduce((acc, g) => {
-      acc[g.natureza] = acc[g.natureza] || { nome: g.natureza, valor: 0 };
-      acc[g.natureza].valor += parseFloat(g.valor || 0);
-      return acc;
-    }, {})
-  );
-
-  const totalGeral = dadosPorNatureza.reduce((soma, item) => soma + item.valor, 0);
-  const dadosPizza = dadosPorNatureza.map((item, index) => ({
-    ...item,
-    cor: cores[index % cores.length],
-    percentual: ((item.valor / totalGeral) * 100).toFixed(1) + '%'
-  }));
-
-  const dadosPorCartao = Object.values(
-    dadosFiltrados.reduce((acc, g) => {
-      const key = g.cartao || 'Outros';
-      acc[key] = acc[key] || { cartao: key, valor: 0 };
-      acc[key].valor += parseFloat(g.valor || 0);
-      return acc;
-    }, {})
-  );
-
-  const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, index }) => {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 30;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const entry = dadosPizza[index];
-
-    return (
-      <text x={x} y={y} fill="#333" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={12}>
-        <tspan x={x} dy="-1.2em">{entry.nome}</tspan>
-        <tspan x={x} dy="1.2em">{entry.percentual}</tspan>
-        <tspan x={x} dy="1.2em">R$ {entry.valor.toFixed(2)}</tspan>
-      </text>
-    );
-  };
+  const dataNatureza = Object.entries(porNatureza).map(([natureza, valor]) => ({ name: natureza, value: valor }));
+  const dataCartao = Object.entries(porCartao).map(([cartao, valor]) => ({ name: cartao, value: valor }));
+  const total = dataNatureza.reduce((acc, item) => acc + item.value, 0);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#c8e6c9', color: 'black', padding: '1rem', fontFamily: 'Arial' }}>
-      <h1 style={{ textAlign: 'center', textTransform: 'uppercase', fontSize: '1.5rem' }}>Gráfico de Gastos</h1>
-      <h2 style={{ textAlign: 'center', fontSize: '1.2rem' }}>{meses[mesAtual]}</h2>
+    <div style={{ backgroundColor: '#c9e4d3', minHeight: '100vh', padding: '2rem 1rem', textAlign: 'center' }}>
+      <div>
+        <label style={{ fontWeight: 'bold' }}>Ano:</label><br />
+        <select value={anoSelecionado} onChange={(e) => setAnoSelecionado(Number(e.target.value))} style={{ margin: '0.5rem 0 1rem', fontSize: '1rem', padding: '0.3rem' }}>
+          {anos.map((ano) => (
+            <option key={ano} value={ano}>{ano}</option>
+          ))}
+        </select>
+      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.3rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0.5rem', justifyContent: 'center', maxWidth: '500px', margin: '0 auto 1rem' }}>
         {meses.map((mes, index) => (
           <button
             key={mes}
-            onClick={() => setMesAtual(index)}
+            onClick={() => setMesSelecionado(index)}
             style={{
-              backgroundColor: mesAtual === index ? '#2e8b57' : '#ccc',
-              color: mesAtual === index ? '#fff' : '#000',
-              padding: '0.4rem 0.7rem',
-              border: 'none',
+              backgroundColor: mesSelecionado === index ? '#ffa500' : '#f0f0f0',
+              padding: '0.4rem 0.6rem',
               borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '0.8rem'
-            }}
-          >
+              fontWeight: 'bold'
+            }}>
             {mes}
           </button>
         ))}
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <button onClick={() => setAnoAtual(anoAtual - 1)} style={{ marginRight: '0.5rem' }}>◀</button>
-        <strong style={{ fontSize: '1rem' }}>{anoAtual}</strong>
-        <button onClick={() => setAnoAtual(anoAtual + 1)} style={{ marginLeft: '0.5rem' }}>▶</button>
-      </div>
+      <h2 style={{ marginBottom: '1rem' }}>{nomesMeses[mesSelecionado]}</h2>
 
-      <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto' }}>
+      <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', padding: '1rem', margin: '0 auto', maxWidth: '700px' }}>
+        <h3 style={{ marginBottom: '1rem' }}>Gastos por Natureza</h3>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
-            <Pie
-              data={dadosPizza}
-              dataKey="valor"
-              nameKey="nome"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              label={renderCustomLabel}
-              labelLine={true}
-            >
-              {dadosPizza.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.cor} />
+            <Pie data={dataNatureza} dataKey="value" cx="50%" cy="50%" outerRadius={100} label={({ name, value }) => `${name}\n${((value/total)*100).toFixed(1)}%\nR$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}>
+              {dataNatureza.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
+            <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <div style={{ width: '100%', maxWidth: '100%', margin: '2rem auto' }}>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart
-            data={dadosPorCartao}
-            layout="vertical"
-            margin={{ top: 20, right: 20, left: 30, bottom: 5 }}
-            barCategoryGap={30}
-            barSize={12}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
+      <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', padding: '1rem', margin: '2rem auto', maxWidth: '700px' }}>
+        <h3 style={{ marginBottom: '1rem' }}>Gastos por Cartão</h3>
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={dataCartao} layout="vertical" margin={{ left: 50 }}>
             <XAxis type="number" hide />
-            <YAxis dataKey="cartao" type="category" width={80} tick={{ fontWeight: 'bold', fontSize: 12 }} />
-            <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
-            <Bar dataKey="valor" fill="#4caf50">
-              <Label dataKey="valor" position="right" formatter={(value) => `R$ ${value.toFixed(2)}`} />
-            </Bar>
+            <YAxis dataKey="name" type="category" tick={{ fontWeight: 'bold' }} />
+            <Bar dataKey="value" fill="#007bff" barSize={15} label={{ position: 'right', formatter: (value) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` }} />
           </BarChart>
         </ResponsiveContainer>
       </div>

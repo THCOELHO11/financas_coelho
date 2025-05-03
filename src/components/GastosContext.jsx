@@ -4,6 +4,7 @@ export const GastosContext = createContext();
 
 export const GastosProvider = ({ children }) => {
   const [gastos, setGastos] = useState([]);
+  const [limites, setLimites] = useState({});
 
   const adicionarGasto = (novo) => {
     setGastos(prev => [...prev, novo]);
@@ -14,7 +15,7 @@ export const GastosProvider = ({ children }) => {
   };
 
   return (
-    <GastosContext.Provider value={{ gastos, adicionarGasto, removerGasto }}>
+    <GastosContext.Provider value={{ gastos, adicionarGasto, removerGasto, limites, setLimites }}>
       {children}
     </GastosContext.Provider>
   );

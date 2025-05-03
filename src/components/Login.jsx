@@ -1,95 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Login = ({ onLogin }) => {
-  const [senha, setSenha] = useState('');
-  const [mostrarSenha, setMostrarSenha] = useState(false);
+const Login = ({ children }) => {
+  const [input, setInput] = useState("");
+  const [autenticado, setAutenticado] = useState(false);
   const [erro, setErro] = useState(false);
+  const navigate = useNavigate();
 
-  const verificarSenha = (e) => {
-    e.preventDefault();
-    if (senha === '11102019') {
-      onLogin();
-    } else {
-      setErro(true);
+  const senhaCorreta = "11102019";
+
+  const handleClick = (numero) => {
+    if (input.length < 8) {
+      setInput((prev) => prev + numero);
     }
   };
 
+  const handleLimpar = () => {
+    setInput("");
+    setErro(false);
+  };
+
+  const handleConfirmar = () => {
+    if (input === senhaCorreta) {
+      setAutenticado(true);
+      navigate("/calculadora");
+    } else {
+      setErro(true);
+      setInput("");
+    }
+  };
+
+  if (autenticado) return children;
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#f8f8f8',
-      fontFamily: 'Arial',
-      padding: '2rem'
-    }}>
-      <h1 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>FINANÇAS FAMÍLIA COELHO</h1>
-
-      <form
-        onSubmit={verificarSenha}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          width: '100%',
-          maxWidth: '300px'
-        }}
-      >
-        <div style={{ position: 'relative' }}>
-          <input
-            type={mostrarSenha ? 'text' : 'password'}
-            inputMode="numeric"
-            placeholder="Digite a senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
+    <div style={{ backgroundColor: "#001f3f", height: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", color: "white", padding: "1rem" }}>
+      <h1 style={{ marginBottom: "1.5rem", textAlign: "center" }}>FINANÇAS FAMÍLIA COELHO</h1>
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
             style={{
-              width: '100%',
-              padding: '0.7rem',
-              fontSize: '1rem',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              textAlign: 'center',
-              paddingRight: '2.5rem'
+              width: "14px",
+              height: "14px",
+              borderRadius: "50%",
+              backgroundColor: i < input.length ? "#FFD700" : "#ccc"
             }}
-          />
+          ></div>
+        ))}
+      </div>
+
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 60px)",
+        gap: "0.75rem",
+        justifyContent: "center",
+        marginBottom: "1.5rem"
+      }}>
+        {["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"].map((num, i) => (
           <button
-            type="button"
-            onClick={() => setMostrarSenha(!mostrarSenha)}
-            style={{
-              position: 'absolute',
-              top: '50%',
-              right: '0.5rem',
-              transform: 'translateY(-50%)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '1.2rem'
+            key={i}
+            onClick={() => {
+              if (num === "⌫") handleLimpar();
+              else if (num === "✓") handleConfirmar();
+              else handleClick(num);
             }}
-            aria-label="Alternar visibilidade da senha"
+            style={{
+              backgroundColor: "#fff",
+              color: "#001f3f",
+              fontSize: "1.25rem",
+              fontWeight: "bold",
+              border: "none",
+              borderRadius: "10px",
+              padding: "0.8rem",
+              cursor: "pointer"
+            }}
           >
-            {mostrarSenha ? '❌' : '👁️'}
+            {num}
           </button>
-        </div>
+        ))}
+      </div>
 
-        {erro && <p style={{ color: 'red', fontSize: '0.9rem', textAlign: 'center' }}>Senha incorreta</p>}
-
-        <button
-          type="submit"
-          style={{
-            padding: '0.7rem',
-            backgroundColor: '#001f3f',
-            color: '#fff',
-            fontWeight: 'bold',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          Entrar
-        </button>
-      </form>
+      {erro && <p style={{ color: "#ff4d4d", marginTop: "1rem", fontWeight: "bold" }}>Senha incorreta. Tente novamente.</p>}
     </div>
   );
 };
