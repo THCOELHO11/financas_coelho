@@ -61,6 +61,8 @@ const LimiteDiario = () => {
 
   return (
     <div style={{ backgroundColor: "#d9e6fc", minHeight: "100vh", padding: "2rem 1rem", textAlign: "center" }}>
+      <h1 style={{ fontSize: "1.5rem", marginBottom: "1.5rem" }}>LIMITE DIÁRIO</h1>
+
       <div style={{ marginBottom: "1rem" }}>
         <select value={anoSelecionado} onChange={(e) => setAnoSelecionado(parseInt(e.target.value))}>
           {[2025, 2026, 2027, 2028, 2029, 2030].map((ano) => (
@@ -68,6 +70,7 @@ const LimiteDiario = () => {
           ))}
         </select>
       </div>
+
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.5rem" }}>
         {meses.map((mes, i) => (
           <button
@@ -85,6 +88,7 @@ const LimiteDiario = () => {
           </button>
         ))}
       </div>
+
       <div style={{ background: "white", padding: "2rem", borderRadius: "16px", marginTop: "2rem", maxWidth: "400px", margin: "2rem auto" }}>
         <h2>Limite Diário</h2>
         <input
@@ -110,6 +114,7 @@ const LimiteDiario = () => {
         />
         <button onClick={salvarLimite} style={{ padding: "0.6rem 2rem", backgroundColor: "#001f3f", color: "white", border: "none", borderRadius: "8px" }}>Salvar</button>
       </div>
+
       {limites.filter(l => l.ano === anoSelecionado && l.mes === mesSelecionado).map((limite, index) => (
         <div key={index} style={{ backgroundColor: '#fff', margin: '1rem auto', padding: '1rem', maxWidth: '500px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold' }}>
           <span>{new Date(limite.inicio).toLocaleDateString()} a {new Date(limite.fim).toLocaleDateString()}</span>
@@ -117,6 +122,7 @@ const LimiteDiario = () => {
           <button onClick={() => removerLimite(index)} style={{ background: 'transparent', border: 'none', color: 'red', fontSize: '1.2rem' }}>🗑</button>
         </div>
       ))}
+
       {limites.some(l => l.ano === anoSelecionado && l.mes === mesSelecionado) && (
         <div style={{ backgroundColor: '#fff', padding: '1rem', borderRadius: '12px', margin: '2rem auto', maxWidth: '300px' }}>
           <h3>SALDO DISPONÍVEL</h3>

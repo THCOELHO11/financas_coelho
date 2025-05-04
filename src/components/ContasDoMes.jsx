@@ -53,6 +53,8 @@ const ContasDoMes = () => {
 
   return (
     <div style={{ backgroundColor: "#ffd700", minHeight: "100vh", padding: "2rem", textAlign: "center" }}>
+      <h1 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>CONTAS DO MÊS</h1>
+
       <select value={ano} onChange={(e) => setAno(parseInt(e.target.value))} style={{ padding: "0.5rem", marginBottom: "1rem" }}>
         {anos.map((a) => <option key={a} value={a}>{a}</option>)}
       </select>

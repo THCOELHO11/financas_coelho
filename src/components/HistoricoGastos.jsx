@@ -18,6 +18,8 @@ const HistoricoGastos = () => {
 
   return (
     <div style={{ backgroundColor: '#3b4c5a', minHeight: '100vh', padding: '2rem 1rem', color: 'white', textAlign: 'center' }}>
+      <h1 style={{ fontSize: "1.5rem", marginBottom: "1.5rem" }}>HISTÓRICO DE GASTOS</h1>
+
       <div>
         <label style={{ fontWeight: 'bold' }}>Ano:</label><br />
         <select value={anoSelecionado} onChange={(e) => setAnoSelecionado(Number(e.target.value))} style={{ margin: '0.5rem 0 1rem', fontSize: '1rem', padding: '0.3rem' }}>
