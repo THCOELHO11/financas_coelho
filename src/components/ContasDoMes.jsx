@@ -22,6 +22,7 @@ const ContasDoMes = () => {
     limite: true
   });
   const [parcelado, setParcelado] = useState(false);
+  const [salvo, setSalvo] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -39,9 +40,18 @@ const ContasDoMes = () => {
 
   const handleSubmit = () => {
     if (!form.descricao || !form.valor || !form.data || !form.natureza) return;
-    setGastos((prev) => [...prev, { ...form, valor: parseNumber(form.valor) }]);
+    const novoGasto = {
+      ...form,
+      valor: parseNumber(form.valor),
+      ano: new Date(form.data).getFullYear(),
+      mes: new Date(form.data).getMonth(),
+      id: Date.now()
+    };
+    setGastos((prev) => [...prev, novoGasto]);
     setForm({ descricao: "", valor: "", data: "", cartao: "Nenhum", natureza: "", parcelas: "", limite: true });
     setParcelado(false);
+    setSalvo(true);
+    setTimeout(() => setSalvo(false), 2000);
   };
 
   const gastosFiltrados = gastos.filter((g) => {
@@ -53,7 +63,7 @@ const ContasDoMes = () => {
 
   return (
     <div style={{ backgroundColor: "#ffd700", minHeight: "100vh", padding: "2rem", textAlign: "center" }}>
-      <h1 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>CONTAS DO MÊS</h1>
+      <h1 style={{ fontSize: "1.5rem", marginBottom: "1.5rem" }}>CONTAS DO MÊS</h1>
 
       <select value={ano} onChange={(e) => setAno(parseInt(e.target.value))} style={{ padding: "0.5rem", marginBottom: "1rem" }}>
         {anos.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -86,7 +96,7 @@ const ContasDoMes = () => {
         <input name="valor" value={form.valor} onChange={handleChange} style={{ padding: "0.6rem", borderRadius: "8px" }} />
 
         <label>DATA DA COMPRA</label>
-        <input type="date" name="data" value={form.data} onChange={handleChange} style={{ padding: "0.6rem", borderRadius: "8px" }} />
+        <input type="date" name="data" value={form.data} onChange={handleChange} style={{ padding: "0.6rem", borderRadius: "8px", height: "45px" }} />
 
         <label>CARTÃO</label>
         <select name="cartao" value={form.cartao} onChange={handleChange} style={{ padding: "0.6rem", borderRadius: "8px" }}>
@@ -129,6 +139,7 @@ const ContasDoMes = () => {
         </label>
 
         <button onClick={handleSubmit} style={{ padding: "0.8rem", backgroundColor: "#001f3f", color: "white", fontWeight: "bold", border: "none", borderRadius: "8px" }}>Salvar</button>
+        {salvo && <p style={{ color: "green", fontWeight: "bold" }}>Salvo!</p>}
       </div>
 
       <div style={{ marginTop: "2rem", fontWeight: "bold", fontSize: "1.2rem" }}>
